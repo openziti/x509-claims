@@ -1,0 +1,203 @@
+# builds on vX.X.X PUSH to main only. Generates versioned binaries, vX.X.X tags, and GitHub releases
+name: release-builds
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  mac-os-build:
+    name: Build Mac OS binaries
+    runs-on: macos-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Save Latest Git Version As Env
+        run: |
+          GIT_LAST_VERSION=$(git describe --tags --abbrev=0)
+          echo "Last git tag: $GIT_LAST_VERSION"
+
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '~1.18.1'
+
+      - name: Build
+        run: |
+          BUILD_DATE=$(date -u "+%F %T+00:00")
+          GIT_COMMIT=$(git rev-parse --short HEAD)
+          GIT_BRANCH=$(git branch --show-current)
+          REPO_PREFIX="github.com/openziti/x509-claims"
+          go build -o "./" ./...
+          tar -cvf x509-claims.tar ./x509-claims
+
+      - name: List
+        run: |
+          pwd
+          ls -la
+
+      - name: Test
+        run: |
+          go test ./...
+
+      - name: Save Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: x509-claims.mac.x64
+          path: ./x509-claims.tar
+
+
+
+  windows-build:
+    name: Build Windows binaries
+    runs-on: windows-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Save Latest Git Version As Env
+        run: |
+          $GIT_LAST_VERSION=git describe --tags --abbrev=0
+          echo "Last git tag: $GIT_LAST_VERSION"
+
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '~1.18.1'
+
+      - name: Build
+        run: |
+          $BUILD_DATE=get-date -AsUTC -Format "yyyy-MM-dd HH:mm:ss+00:00"
+          $GIT_COMMIT=git rev-parse --short HEAD
+          $GIT_BRANCH=git branch --show-current
+          $REPO_PREFIX="github.com/openziti/x509-claims"
+          go build -o "./" ./...
+      - name: List
+        run: |
+          ls
+
+      - name: Test
+        run: |
+          go test ./...
+
+      - name: Save Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: x509-claims.windows.x64
+          path: ./x509-claims.exe
+
+  linux-build:
+    name: Build Linux Binaries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Save Latest Git Version As Env
+        run: |
+          GIT_LAST_VERSION=$(git describe --tags --abbrev=0)
+          echo "Last git tag: $GIT_LAST_VERSION"
+
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '~1.18.1'
+
+      - name: Build
+        run: |
+          BUILD_DATE=$(date -u "+%F %T+00:00")
+          GIT_COMMIT=$(git rev-parse --short HEAD)
+          GIT_BRANCH=$(git branch --show-current)
+          REPO_PREFIX="github.com/openziti/x509-claims"
+          go build -o "./" ./...
+          tar -cvf x509-claims.tar ./x509-claims
+      - name: List
+        run: |
+          pwd
+          ls -la
+
+      - name: Test
+        run: |
+          go test ./...
+
+      - name: Save Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: x509-claims.linux.x64
+          path: ./x509-claims.tar
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [mac-os-build, windows-build, linux-build]
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v2
+      - name: List Files
+        run: |
+          pwd
+          ls -la
+          ls -la x509-claims.linux.x64
+          ls -la x509-claims.windows.x64
+          ls -la x509-claims.mac.x64
+      - name: Compress Artifacts
+        run: |
+          zip ./x509-claims.windows.x64.zip ./x509-claims.windows.x64/x509-claims.exe
+          
+          gzip ./x509-claims.linux.x64/x509-claims.tar
+          mv ./x509-claims.linux.x64/x509-claims.tar.gz ./x509-claims.linux.x64.tar.gz
+          
+          gzip ./x509-claims.mac.x64/x509-claims.tar
+          mv ./x509-claims.mac.x64/x509-claims.tar.gz ./x509-claims.mac.x64.tar.gz
+          
+          ls -la
+
+      - name: Create Release w/ Notes & Artifacts
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Linux Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} #ref's the URL for the release created above
+          asset_path: ./x509-claims.linux.x64.tar.gz
+          asset_name: x509-claims.linux.x64.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload MacOs Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} #ref's the URL for the release created above
+          asset_path: ./x509-claims.mac.x64.tar.gz
+          asset_name: x509-claims.mac.x64.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload Windows Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} #ref's the URL for the release created above
+          asset_path: ./x509-claims.windows.x64.zip
+          asset_name: x509-claims.windows.x64.zip
+          asset_content_type: application/zip
