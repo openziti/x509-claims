@@ -21,11 +21,11 @@ func (_ *LocatorCommonName) Locate(cert *x509.Certificate, matcher Matcher[strin
 	return []string{}
 }
 
-var _ Locator[*url.URL] = &LocatorUriSan{}
+var _ Locator[*url.URL] = &LocatorSanUri{}
 
-type LocatorUriSan struct{}
+type LocatorSanUri struct{}
 
-func (_ *LocatorUriSan) Locate(cert *x509.Certificate, matcher Matcher[*url.URL]) []string {
+func (_ *LocatorSanUri) Locate(cert *x509.Certificate, matcher Matcher[*url.URL]) []string {
 	var result []string
 	for _, uri := range cert.URIs {
 		if value, ok := matcher.Match(uri); ok {
