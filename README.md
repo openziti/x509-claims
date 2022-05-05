@@ -55,7 +55,7 @@ This repository is meant to be used as a library, however it provides an example
 example parsing program. It can be run on the example file in `data/example.svid.cert`.
 
 This program is intended as a working example for developers new to dealing with x509 Certificates in go. It provides
-an example of parsing a single PEM encoded pile file into DER and then parsing DER into go x509.Certificates.
+an example of parsing a single PEM encoded file into DER and then parsing DER into go x509.Certificates.
 Additionally, it parses out any SPIFFE IDs from those certificates.
 
 ```
