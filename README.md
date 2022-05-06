@@ -12,7 +12,7 @@ their own conventions or add custom `Locator`, `Matcher`, and/or `Parser` implem
 
 The following example show how to add a `DefinitionLMP` that will parse out any SPIFFE ID from a x509.Certificate
 SVID. As a note, the current SPIFFE spec allows only 1 SPIFFE ID per SVID. This example would return ALL
-URI SANs wit the scheme `spiffe`. It would be up the implementor to only use the first value per the SPIFFE spec.
+URI SANs with the scheme `spiffe`. It would be up the implementor to only use the first value per the SPIFFE spec.
 
 Example:
 

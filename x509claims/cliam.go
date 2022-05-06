@@ -17,7 +17,7 @@
 //		provider := ProviderBasic{
 //			Definitions: []Definition{
 //				&DefinitionLMP[*url.URL]{
-//					Locator: &LocatorUriSan{},
+//					Locator: &LocatorSanUri{},
 //					Matcher: &MatcherScheme{Scheme: "spiffe"},
 //					Parser:  &ParserNoOp{},
 //				},
@@ -31,7 +31,7 @@
 //		provider := ProviderBasic{
 //			Definitions: []Definition{
 //				&DefinitionLMP[*url.URL]{
-//					Locator: &LocatorUriSan{},
+//					Locator: &LocatorSanUri{},
 //					Matcher: &MatcherScheme{Scheme: "spiffe"},
 //					Parser:  &ParserNoOp{},
 //				},

@@ -16,7 +16,7 @@ func TestConfig_Claims(t *testing.T) {
 		provider := ProviderBasic{
 			Definitions: []Definition{
 				&DefinitionLMP[*url.URL]{
-					Locator: &LocatorUriSan{},
+					Locator: &LocatorSanUri{},
 					Matcher: &MatcherScheme{Scheme: "spiffe"},
 					Parser:  &ParserNoOp{},
 				},
@@ -47,7 +47,7 @@ func TestConfig_Claims(t *testing.T) {
 		provider := ProviderBasic{
 			Definitions: []Definition{
 				&DefinitionLMP[*url.URL]{
-					Locator: &LocatorUriSan{},
+					Locator: &LocatorSanUri{},
 					Matcher: &MatcherScheme{Scheme: "spiffe"},
 					Parser:  &ParserNoOp{},
 				},

@@ -58,7 +58,7 @@ func main() {
 	provider := x509claims.ProviderBasic{
 		Definitions: []x509claims.Definition{
 			&x509claims.DefinitionLMP[*url.URL]{
-				Locator: &x509claims.LocatorUriSan{},
+				Locator: &x509claims.LocatorSanUri{},
 				Matcher: &x509claims.MatcherScheme{Scheme: "spiffe"},
 				Parser:  &x509claims.ParserNoOp{},
 			},
