@@ -43,7 +43,7 @@
 //			},
 //		}
 // ```
-package x509claims
+package x509_claims
 
 import (
 	"crypto/x509"

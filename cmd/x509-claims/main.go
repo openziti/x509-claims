@@ -4,7 +4,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"github.com/openziti/x509-claims/x509claims"
+	"github.com/openziti/x509-claims"
 	"net/url"
 	"os"
 )
@@ -55,12 +55,12 @@ func main() {
 
 	fmt.Printf("...parsed %d certificates\n", len(certs))
 
-	provider := x509claims.ProviderBasic{
-		Definitions: []x509claims.Definition{
-			&x509claims.DefinitionLMP[*url.URL]{
-				Locator: &x509claims.LocatorSanUri{},
-				Matcher: &x509claims.MatcherScheme{Scheme: "spiffe"},
-				Parser:  &x509claims.ParserNoOp{},
+	provider := x509_claims.ProviderBasic{
+		Definitions: []x509_claims.Definition{
+			&x509_claims.DefinitionLMP[*url.URL]{
+				Locator: &x509_claims.LocatorSanUri{},
+				Matcher: &x509_claims.MatcherScheme{Scheme: "spiffe"},
+				Parser:  &x509_claims.ParserNoOp{},
 			},
 		},
 	}
