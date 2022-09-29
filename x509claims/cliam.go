@@ -14,34 +14,38 @@
 //
 // Example:
 // ```
-//		provider := ProviderBasic{
-//			Definitions: []Definition{
-//				&DefinitionLMP[*url.URL]{
-//					Locator: &LocatorSanUri{},
-//					Matcher: &MatcherScheme{Scheme: "spiffe"},
-//					Parser:  &ParserNoOp{},
-//				},
+//
+//	provider := ProviderBasic{
+//		Definitions: []Definition{
+//			&DefinitionLMP[*url.URL]{
+//				Locator: &LocatorSanUri{},
+//				Matcher: &MatcherScheme{Scheme: "spiffe"},
+//				Parser:  &ParserNoOp{},
 //			},
-//		}
+//		},
+//	}
+//
 // ```
 //
 // The following example returns SPIFFE IDs as well as email claims from an email SAN:
 // Example:
 // ```
-//		provider := ProviderBasic{
-//			Definitions: []Definition{
-//				&DefinitionLMP[*url.URL]{
-//					Locator: &LocatorSanUri{},
-//					Matcher: &MatcherScheme{Scheme: "spiffe"},
-//					Parser:  &ParserNoOp{},
+//
+//			provider := ProviderBasic{
+//				Definitions: []Definition{
+//					&DefinitionLMP[*url.URL]{
+//						Locator: &LocatorSanUri{},
+//						Matcher: &MatcherScheme{Scheme: "spiffe"},
+//						Parser:  &ParserNoOp{},
+//					},
 //				},
-//			},
-//             	&DefinitionLMP[string]{
-//					Locator: &LocatorSanEmail{},
-//					Matcher: &MatcherSuffix{Suffix: "@my.domain.dev"},
-//					Parser:  &ParserSplit{Separator: "."},
-//			},
-//		}
+//	            	&DefinitionLMP[string]{
+//						Locator: &LocatorSanEmail{},
+//						Matcher: &MatcherSuffix{Suffix: "@my.domain.dev"},
+//						Parser:  &ParserSplit{Separator: "."},
+//				},
+//			}
+//
 // ```
 package x509claims
 
@@ -67,8 +71,14 @@ type ProviderBasic struct {
 func (c *ProviderBasic) Claims(cert *x509.Certificate) []string {
 	var result []string
 
+	if c == nil || cert == nil {
+		return result
+	}
+
 	for _, def := range c.Definitions {
-		result = append(result, def.Claims(cert)...)
+		if def != nil {
+			result = append(result, def.Claims(cert)...)
+		}
 	}
 	return result
 }
@@ -96,6 +106,11 @@ type DefinitionLMP[M any] struct {
 // of string values that can be parsed into claims.
 func (d *DefinitionLMP[M]) Claims(cert *x509.Certificate) []string {
 	var result []string
+
+	if d == nil {
+		return result
+	}
+
 	for _, value := range d.Locator.Locate(cert, d.Matcher) {
 		result = append(result, d.Parser.Parse(value)...)
 	}
