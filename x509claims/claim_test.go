@@ -256,4 +256,121 @@ func TestConfig_Claims(t *testing.T) {
 		resultClaims := provider.Claims(cert)
 		req.Nil(resultClaims)
 	})
+
+	t.Run("fails to find claims with empty definitions", func(t *testing.T) {
+		req := require.New(t)
+
+		provider := ProviderBasic{
+			Definitions: []Definition{},
+		}
+
+		urlStr := "spiffe://mytrustdomain/myidentity"
+		spiffeUrl, err := url.Parse(urlStr)
+		req.NoError(err)
+
+		nonSpiffeUrl, err := url.Parse("nomatch://not/here/man")
+		req.NoError(err)
+
+		cert := &x509.Certificate{
+			URIs: []*url.URL{
+				spiffeUrl,
+				nonSpiffeUrl,
+			},
+		}
+
+		claims := provider.Claims(cert)
+		req.Len(claims, 0)
+	})
+
+	t.Run("fails to find claims with nil definitions", func(t *testing.T) {
+		req := require.New(t)
+
+		provider := ProviderBasic{
+			Definitions: nil,
+		}
+
+		urlStr := "spiffe://mytrustdomain/myidentity"
+		spiffeUrl, err := url.Parse(urlStr)
+		req.NoError(err)
+
+		nonSpiffeUrl, err := url.Parse("nomatch://not/here/man")
+		req.NoError(err)
+
+		cert := &x509.Certificate{
+			URIs: []*url.URL{
+				spiffeUrl,
+				nonSpiffeUrl,
+			},
+		}
+
+		claims := provider.Claims(cert)
+		req.Len(claims, 0)
+	})
+
+	t.Run("fails to find claims with nil certificate", func(t *testing.T) {
+		req := require.New(t)
+
+		provider := ProviderBasic{
+			Definitions: []Definition{
+				&DefinitionLMP[string]{
+					Locator: &LocatorCommonName{},
+					Matcher: &MatcherPrefix{Prefix: "SENTINEL:"},
+					Parser:  &ParserSplit{Separator: "."},
+				},
+			},
+		}
+
+		resultClaims := provider.Claims(nil)
+		req.Len(resultClaims, 0)
+	})
+
+	t.Run("fails to find claims with nil provider", func(t *testing.T) {
+		req := require.New(t)
+
+		var provider *ProviderBasic = nil
+
+		urlStr := "spiffe://mytrustdomain/myidentity"
+		spiffeUrl, err := url.Parse(urlStr)
+		req.NoError(err)
+
+		nonSpiffeUrl, err := url.Parse("nomatch://not/here/man")
+		req.NoError(err)
+
+		cert := &x509.Certificate{
+			URIs: []*url.URL{
+				spiffeUrl,
+				nonSpiffeUrl,
+			},
+		}
+
+		resultClaims := provider.Claims(cert)
+		req.Len(resultClaims, 0)
+	})
+
+	t.Run("fails to find claims with nil definitions", func(t *testing.T) {
+		req := require.New(t)
+
+		provider := ProviderBasic{
+			Definitions: []Definition{
+				nil,
+			},
+		}
+
+		urlStr := "spiffe://mytrustdomain/myidentity"
+		spiffeUrl, err := url.Parse(urlStr)
+		req.NoError(err)
+
+		nonSpiffeUrl, err := url.Parse("nomatch://not/here/man")
+		req.NoError(err)
+
+		cert := &x509.Certificate{
+			URIs: []*url.URL{
+				spiffeUrl,
+				nonSpiffeUrl,
+			},
+		}
+
+		claims := provider.Claims(cert)
+		req.Len(claims, 0)
+	})
 }
